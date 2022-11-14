@@ -1304,6 +1304,9 @@ func applyDatabasesConfig(fc *FileConfig, cfg *service.Config) error {
 				Redshift: service.DatabaseAWSRedshift{
 					ClusterID: database.AWS.Redshift.ClusterID,
 				},
+				RedshiftServerless: service.DatabaseAWSRedshiftServerless{
+					WorkgroupName: database.AWS.RedshiftServerless.WorkgroupName,
+				},
 				RDS: service.DatabaseAWSRDS{
 					InstanceID: database.AWS.RDS.InstanceID,
 					ClusterID:  database.AWS.RDS.ClusterID,
