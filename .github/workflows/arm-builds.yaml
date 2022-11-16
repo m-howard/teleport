@@ -6,7 +6,9 @@ on:
 jobs:
   build:
     name: Build ARM32 devices
-    runs-on: amd32v7/centos:7
+    runs-on: ubuntu-latest
+    container:
+      image: arm32v7/centos:7
     steps:
       - name: Check GLIBC version
         run: ldd --version
