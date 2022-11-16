@@ -13,5 +13,7 @@ jobs:
 
       - name: Check GLIBC version
         uses: docker://arm32v8/centos:7
-        run: ldd --version
+        with: 
+          entrypoint: ldd
+          args:  --version
 
