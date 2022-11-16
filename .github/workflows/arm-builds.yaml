@@ -1,0 +1,13 @@
+name: Build Teleport Connect for Windows
+on: 
+  push:
+    branches:
+      - tcsc/gha-arm-builds
+jobs:
+  build:
+    name: Build ARM32 devices
+    runs-on: amd32v7/centos:7
+    steps:
+      - name: Check GLIBC version
+        run: ldd --version
+
