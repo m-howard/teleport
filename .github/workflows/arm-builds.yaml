@@ -12,6 +12,6 @@ jobs:
         uses: docker/setup-qemu-action@v1
 
       - name: Check GLIBC version
-        with: docker://arm32v8/centos:7
+        uses: docker://arm32v8/centos:7
         run: ldd --version
 
