@@ -26,8 +26,12 @@ import (
 	"sync"
 	"time"
 
+	"go.opentelemetry.io/otel/attribute"
+	oteltrace "go.opentelemetry.io/otel/trace"
+
 	"github.com/gravitational/teleport"
 	"github.com/gravitational/teleport/api/constants"
+	"github.com/gravitational/teleport/api/observability/tracing"
 	"github.com/gravitational/teleport/api/types"
 	apievents "github.com/gravitational/teleport/api/types/events"
 	"github.com/gravitational/teleport/lib/auth"
@@ -579,7 +583,7 @@ func newSession(ctx context.Context, id rsession.ID, r *SessionRegistry, scx *Se
 		}
 	}()
 
-	if err = sess.trackSession(scx.Identity.TeleportUser, policySets); err != nil {
+	if err = sess.trackSession(ctx, scx.Identity.TeleportUser, policySets); err != nil {
 		if trace.IsNotImplemented(err) {
 			return nil, trace.NotImplemented("Attempted to use Moderated Sessions with an Auth Server below the minimum version of 9.0.0.")
 		}
@@ -1707,7 +1711,7 @@ func (p *party) closeUnderSessionLock() {
 // trackSession creates a new session tracker for the ssh session.
 // While ctx is open, the session tracker's expiration will be extended
 // on an interval until the session tracker is closed.
-func (s *session) trackSession(teleportUser string, policySet []*types.SessionTrackerPolicySet) error {
+func (s *session) trackSession(ctx context.Context, teleportUser string, policySet []*types.SessionTrackerPolicySet) error {
 	trackerSpec := types.SessionTrackerSpecV1{
 		SessionID:    s.id.String(),
 		Kind:         string(types.SSHSessionKind),
@@ -1736,8 +1740,19 @@ func (s *session) trackSession(teleportUser string, policySet []*types.SessionTr
 	}
 
 	go func() {
-		if err := s.tracker.UpdateExpirationLoop(s.serverCtx, s.registry.clock); err != nil {
-			s.log.WithError(err).Debug("Failed to update session tracker expiration")
+		ctx, span := tracing.DefaultProvider().Tracer("session").Start(
+			s.serverCtx,
+			"session/UpdateExpirationLoop",
+			oteltrace.WithLinks(oteltrace.LinkFromContext(ctx)),
+			oteltrace.WithAttributes(
+				attribute.String("session_id", s.id.String()),
+				attribute.String("kind", string(types.SSHSessionKind)),
+			),
+		)
+		defer span.End()
+
+		if err := s.tracker.UpdateExpirationLoop(ctx, s.registry.clock); err != nil {
+			s.log.WithError(err).Warn("Failed to update session tracker expiration")
 		}
 	}()
 
