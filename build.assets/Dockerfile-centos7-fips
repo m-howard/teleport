@@ -64,15 +64,13 @@ RUN git clone https://github.com/ninja-build/ninja.git && \
     ./configure.py --bootstrap && \
     mv ninja /usr/bin
 
-RUN ln -s /usr/bin/cmake3 /usr/bin/cmake
-
 RUN mkdir -p /opt && cd /opt && \
     git clone https://github.com/google/boringssl.git && \
     cd boringssl && \
     git checkout ae223d6138807a13006342edfeef32e813246b39 && \
     mkdir build && \
     cd build && \
-    scl enable llvm-toolset-7.0 "cd /opt/boringssl/build && cmake -DFIPS=1 -DCMAKE_BUILD_TYPE=Release -GNinja .. && ninja"
+    scl enable llvm-toolset-7.0 "cd /opt/boringssl/build && cmake3 -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ -DFIPS=1 -DCMAKE_BUILD_TYPE=Release -GNinja .. && ninja"
 
 
 FROM centos:7

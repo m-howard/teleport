@@ -28,9 +28,8 @@ RUN apt-get update -y --fix-missing && \
     rm -rf /var/lib/apt/lists/*
 
 
-ARG LLVM_VERSION=7.0.1
 RUN mkdir -p /opt && cd /opt && curl -L https://releases.llvm.org/7.0.1/clang+llvm-7.0.1-x86_64-linux-gnu-ubuntu-18.04.tar.xz | tar xJ 
-ENV PATH="$PATH:/opt/clang+llvm-7.0.1-x86_64-linux-gnu-ubuntu-18.04/bin"
+ENV PATH="/opt/clang+llvm-7.0.1-x86_64-linux-gnu-ubuntu-18.04/bin:$PATH"
 
 
 RUN mkdir -p /opt && cd /opt && curl https://storage.googleapis.com/golang/1.12.7.linux-amd64.tar.gz | tar xz && \
@@ -39,7 +38,7 @@ RUN mkdir -p /opt && cd /opt && curl https://storage.googleapis.com/golang/1.12.
     chmod a-w /
 ENV GOPATH="/go" \
     GOROOT="/opt/go" \
-    PATH="/opt/llvm/bin:$PATH:/opt/go/bin:/go/bin"
+    PATH="$PATH:/opt/go/bin:/go/bin"
 
 RUN mkdir -p /opt && cd /opt && \
     curl -sLO https://github.com/ninja-build/ninja/releases/download/v1.9.0/ninja-linux.zip && \
@@ -52,7 +51,7 @@ RUN mkdir -p /opt && cd /opt && \
     git checkout ae223d6138807a13006342edfeef32e813246b39 && \
     mkdir build && \
     cd build && \
-    cmake -DFIPS=1 -DCMAKE_BUILD_TYPE=Release -GNinja .. && \
+    cmake -DFIPS=1 -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_BUILD_TYPE=Release -GNinja .. && \
     ninja
 
 
