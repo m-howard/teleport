@@ -28,11 +28,19 @@ RUN apt-get update -y --fix-missing && \
     rm -rf /var/lib/apt/lists/*
 
 
-RUN mkdir -p /opt && cd /opt && curl -L https://releases.llvm.org/7.0.1/clang+llvm-7.0.1-x86_64-linux-gnu-ubuntu-18.04.tar.xz | tar xJ 
+RUN mkdir -p /opt && cd /opt && \
+    curl -sLO https://releases.llvm.org/7.0.1/clang+llvm-7.0.1-x86_64-linux-gnu-ubuntu-18.04.tar.xz && \
+    echo "61bad4c025a0c5dfcfb1638854f16258343bd7a19da3149cab78a4248fd367be" "clang+llvm-7.0.1-x86_64-linux-gnu-ubuntu-18.04.tar.xz" | sha256sum --check && \
+    tar xJf clang+llvm-7.0.1-x86_64-linux-gnu-ubuntu-18.04.tar.xz && \
+    rm -f clang+llvm-7.0.1-x86_64-linux-gnu-ubuntu-18.04.tar.xz
 ENV PATH="/opt/clang+llvm-7.0.1-x86_64-linux-gnu-ubuntu-18.04/bin:$PATH"
 
 
-RUN mkdir -p /opt && cd /opt && curl https://storage.googleapis.com/golang/1.12.7.linux-amd64.tar.gz | tar xz && \
+RUN mkdir -p /opt && cd /opt && \
+    curl -sLO https://storage.googleapis.com/golang/1.12.7.linux-amd64.tar.gz && \
+    echo "66d83bfb5a9ede000e33c6579a91a29e6b101829ad41fffb5c5bb6c900e109d9" "1.12.7.linux-amd64.tar.gz" | sha256sum --check && \
+    tar xzf 1.12.7.linux-amd64.tar.gz && \
+    rm -f 1.12.7.linux-amd64.tar.gz && \
     chmod a+w /opt/go && \
     chmod a+w /var/lib && \
     chmod a-w /
@@ -42,7 +50,9 @@ ENV GOPATH="/go" \
 
 RUN mkdir -p /opt && cd /opt && \
     curl -sLO https://github.com/ninja-build/ninja/releases/download/v1.9.0/ninja-linux.zip && \
+    echo "1b1235f2b0b4df55ac6d80bbe681ea3639c9d2c505c7ff2159a3daf63d196305" "ninja-linux.zip" | sha256sum --check && \
     unzip ninja-linux.zip && \
+    rm -f ninja-linux.zip && \
     mv /opt/ninja /usr/bin
 
 RUN mkdir -p /opt && cd /opt && \
